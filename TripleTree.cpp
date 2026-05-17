@@ -66,7 +66,6 @@ void add(int n, tree *&r)
     {
         std::vector<ref> vech;
         minDepth(r, vech);
-        //ref p = new ref;
         ref p = vech.at(0);
         for (int i = 1; i < vech.size(); i++)
         {
