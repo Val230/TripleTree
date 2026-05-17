@@ -1,18 +1,58 @@
-﻿// TripleTree.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
 #include <vector>
 #include <random>
 #include <chrono>
 
-//using namespace std;
-//using namespace std::chrono;
-
 struct tree {
     int key;
     tree* left, * middle, * right;
 }*root = NULL;
+
+struct ref {
+    tree** key;
+    int depth_pos;
+};
+
+void minDepth(tree*& r, std::vector<ref> &vech)
+{
+    static int count = 0;
+    if (r->left)
+    {
+        count++;
+        minDepth(r->left, *&vech);
+        count--;
+    }
+    else
+    {
+        count++;
+        vech.push_back({ &r->left, count });
+        count--;
+    }
+    if (r->middle)
+    {
+        count++;
+        minDepth(r->middle, *&vech);
+        count--;
+    }
+    else
+    {
+        count++;
+        vech.push_back({ &r->middle, count });
+        count--;
+    }
+    if (r->right)
+    {
+        count++;
+        minDepth(r->right, *&vech);
+        count--;
+    }
+    else
+    {
+        count++;
+        vech.push_back({ &r->right, count });
+        count--;
+    }
+}
 
 void add(int n, tree *&r)
 {
@@ -24,20 +64,19 @@ void add(int n, tree *&r)
     }
     else
     {
-        std::random_device randAdd;
-        int place = (randAdd() * 1.0 / randAdd.max() * 3) + 1; // (randAdd() % 3) + 1
-        if (place == 1)
+        std::vector<ref> vech;
+        minDepth(r, vech);
+        //ref p = new ref;
+        ref p = vech.at(0);
+        for (int i = 1; i < vech.size(); i++)
         {
-            add(n, r->left);
+            if (vech.at(i).depth_pos < p.depth_pos)
+            {
+                p = vech.at(i);
+            }
         }
-        else if (place == 2)
-        {
-            add(n, r->middle);
-        }
-        else 
-        {
-            add(n, r->right);
-        }
+        vech.clear();
+        add(n, *p.key);
     }
 }
 
@@ -48,23 +87,23 @@ void Depth(tree*& r, std::vector<int> &dpth)
     {
         count++;
         Depth(r->left, dpth);
-    }
-    dpth.push_back(count);
-    count--;
+        dpth.push_back(count);
+        count--;
+    } 
     if (r->middle)
     {
         count++;
         Depth(r->middle, dpth);
+        dpth.push_back(count);
+        count--;
     }
-    dpth.push_back(count);
-    count--;
     if (r->right)
     {
         count++;
         Depth(r->right, dpth);
+        dpth.push_back(count);
+        count--;
     }
-    dpth.push_back(count);
-    count--;
 }
 
 void Sum(int mxdpth, tree *&r, int &sum) 
@@ -93,34 +132,44 @@ void Sum(int mxdpth, tree *&r, int &sum)
     }
     else
     {
-        if (r->key != NULL)
-        {
-            sum += r->key;
-        }
+        sum += r->key;
     }
 }
 
+void BrowseLRMR(tree *&r)
+{
+    if (r != NULL)
+    {
+        BrowseLRMR(r->left);
+        std::cout << r->key << " ";
+        BrowseLRMR(r->middle);
+        BrowseLRMR(r->right);
+    }
+}
 int main()
 {
-    auto start = std::chrono::high_resolution_clock::now();
     std::random_device rand;
     int n;
     std::cout << "Enter array size: ";
     std::cin >> n;
+    auto start = std::chrono::high_resolution_clock::now();
     std::vector<int> vec;
     for (int i = 0; i < n; i++)
     {
-        vec.push_back((rand() * 1.0 / rand.max() * 100) + 1);
-        add(vec[i], root);
+        vec.push_back((rand() * 1.0 / rand.max() * 100) + 1); 
+        add(vec.at(i), root);
+        std::cout << "Entered element " << vec.at(i) << "\n";
     }
+    std::cout << "Browsing tree (Left -> Root -> Middle -> Right): ";
+    BrowseLRMR(root);
     vec.clear();
     Depth(root, vec);
-    int mxdpth = vec[0];
+    int mxdpth = vec.at(0);
     for (int i = 1; i < vec.size(); i++)
     {
         if (vec[i] > mxdpth)
         {
-            mxdpth = vec[i];
+            mxdpth = vec.at(i);
         }
     }
     vec.clear();
@@ -135,14 +184,3 @@ int main()
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     std::cout << "\nExecution time: " << duration.count() << "ms";
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
