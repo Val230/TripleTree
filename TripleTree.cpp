@@ -3,6 +3,9 @@
 #include <random>
 #include <chrono>
 
+//using namespace std;
+//using namespace std::chrono;
+
 struct tree {
     int key;
     tree* left, * middle, * right;
@@ -54,7 +57,7 @@ void minDepth(tree*& r, std::vector<ref> &vech)
     }
 }
 
-void add(int n, tree *&r)
+void add(int n, tree *&r) 
 {
     if (r == NULL)
     {
@@ -75,7 +78,7 @@ void add(int n, tree *&r)
             }
         }
         vech.clear();
-        add(n, *p.key);
+        add(n, *p.key);      
     }
 }
 
@@ -105,7 +108,7 @@ void Depth(tree*& r, std::vector<int> &dpth)
     }
 }
 
-void Sum(int mxdpth, tree *&r, int &sum) 
+void Sum(int mxdpth, tree *&r, int &sum)
 {
     static int depth = 0;
     if (depth < mxdpth)
@@ -148,6 +151,8 @@ void BrowseLRMR(tree *&r)
 int main()
 {
     std::random_device rand;
+    std::mt19937 gen(rand()); 
+    std::uniform_real_distribution<> dist(1, 100);
     int n;
     std::cout << "Enter array size: ";
     std::cin >> n;
@@ -155,7 +160,7 @@ int main()
     std::vector<int> vec;
     for (int i = 0; i < n; i++)
     {
-        vec.push_back((rand() * 1.0 / rand.max() * 100) + 1); 
+        vec.push_back(dist(gen)); 
         add(vec.at(i), root);
         std::cout << "Entered element " << vec.at(i) << "\n";
     }
@@ -166,7 +171,7 @@ int main()
     int mxdpth = vec.at(0);
     for (int i = 1; i < vec.size(); i++)
     {
-        if (vec[i] > mxdpth)
+        if (vec.at(i) > mxdpth)
         {
             mxdpth = vec.at(i);
         }
